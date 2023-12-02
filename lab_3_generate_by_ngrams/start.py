@@ -1,7 +1,8 @@
 """
 Generation by NGrams starter
 """
-import lab_3_generate_by_ngrams.main as main_py
+from lab_3_generate_by_ngrams.main import (BeamSearchTextGenerator, GreedyTextGenerator,
+                                           NGramLanguageModel, TextProcessor)
 
 
 def main() -> None:
@@ -12,20 +13,21 @@ def main() -> None:
     """
     with open("./assets/Harry_Potter.txt", "r", encoding="utf-8") as text_file:
         text = text_file.read()
-    split_text = main_py.TextProcessor('_')
-    encoded_text = split_text.encode(text)
-    if not (isinstance(encoded_text, tuple) and encoded_text):
+    processor = TextProcessor(end_of_word_token='_')
+    encoded = processor.encode(text)
+    if not(isinstance(encoded, tuple) and encoded):
         return
-    result = split_text.decode(encoded_text)
-    print(result)
-    model = main_py.NGramLanguageModel(encoded_text[:100], 3)
-    print(model.build())
-    lang_model = main_py.NGramLanguageModel(encoded_text, 7)
-    greedy_text = main_py.GreedyTextGenerator(lang_model, split_text)
-    print(greedy_text.run(51, 'Vernon'))
-    greedy = main_py.BeamSearchTextGenerator(lang_model, split_text, 7)
-    print(greedy.run('Vernon', 56))
 
+    decoded = str(processor.decode(encoded))
+    result = decoded
+
+    n_gram_model = NGramLanguageModel(encoded[:100], n_gram_size=3)
+    model_7 = NGramLanguageModel(encoded, 7)
+    greedy_text_generator = GreedyTextGenerator(model_7, processor)
+    print(greedy_text_generator.run(51, 'Vernon'))
+
+    beam_search_generator = BeamSearchTextGenerator(model_7, processor, 7)
+    print(beam_search_generator.run('Vernon', 56))
     assert result
 
 
